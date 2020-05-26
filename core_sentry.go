@@ -12,6 +12,7 @@ import (
 )
 
 const (
+	coreSentryLevel        = zapcore.WarnLevel
 	coreSentryFlushTimeout = 5 * time.Second
 	errorKey               = "error"
 	httpRequestKey         = "http_request"
@@ -36,7 +37,7 @@ type coreSentry struct {
 
 func newCoreSentry(hub *sentry.Hub, enab zapcore.LevelEnabler) zapcore.Core {
 	lvlError := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
-		return enab.Enabled(lvl) && lvl >= zapcore.ErrorLevel
+		return enab.Enabled(lvl) && lvl >= coreSentryLevel
 	})
 
 	return &coreSentry{
