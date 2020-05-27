@@ -16,6 +16,20 @@ func OnRecover(f RecoveryFunc) {
 	}
 }
 
+func WithRecover(f func()) error {
+	var rErr error
+
+	func() {
+		defer OnRecover(func(err error) {
+			rErr = err
+		})
+
+		f()
+	}()
+
+	return rErr
+}
+
 // Taken from runtime/error.go in the standard library (how it prints panics)
 func printany(i interface{}) string {
 	switch v := i.(type) {
