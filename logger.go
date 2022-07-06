@@ -1,6 +1,8 @@
 package zapex
 
 import (
+	"net/http"
+
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -36,4 +38,12 @@ func Setup(level string) error {
 
 func L() *zap.Logger {
 	return _logger
+}
+
+func HTTPRequest(r *http.Request) zap.Field {
+	if r == nil {
+		return zap.Skip()
+	}
+
+	return zap.Field{Key: httpRequestKey, Type: zapcore.ReflectType, Interface: r}
 }
