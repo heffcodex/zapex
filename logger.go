@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var _logger *zap.Logger
+var _logger = zap.L()
 
 func Setup(level string) error {
 	hub, err := newSentryHub()
