@@ -9,10 +9,12 @@ import (
 
 type RecoveryFunc func(err error)
 
-func OnRecover(f RecoveryFunc) {
-	if e := recover(); e != nil {
-		err := errors.New(printany(e))
-		f(err)
+func OnRecover(f RecoveryFunc) func() {
+	return func() {
+		if e := recover(); e != nil {
+			err := errors.New(printany(e))
+			f(err)
+		}
 	}
 }
 
@@ -22,7 +24,7 @@ func WithRecover(f func()) error {
 	func() {
 		defer OnRecover(func(err error) {
 			rErr = err
-		})
+		})()
 
 		f()
 	}()
