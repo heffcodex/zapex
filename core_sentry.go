@@ -14,7 +14,6 @@ import (
 const (
 	coreSentryLevel        = zapcore.WarnLevel
 	coreSentryFlushTimeout = 5 * time.Second
-	errorKey               = "error"
 	httpRequestKey         = "http_request"
 	omitHeadStackFrames    = 4
 )
@@ -70,17 +69,23 @@ func (c *coreSentry) Write(ent zapcore.Entry, fields []zapcore.Field) error {
 	extra := make(map[string]interface{})
 
 	for _, f := range fields {
-		switch f.Key {
-		case errorKey:
-			e := f.Interface.(error)
-
+		switch v := f.Interface.(type) {
+		case error:
 			exceptions = append(exceptions, sentry.Exception{
-				Type:       reflect.TypeOf(e).String(),
-				Value:      e.Error(),
-				Stacktrace: c.prepareStacktrace(e),
+				Type:       reflect.TypeOf(v).String(),
+				Value:      v.Error(),
+				Stacktrace: c.prepareStacktrace(v),
 			})
-		case httpRequestKey:
-			httpRequest = sentry.NewRequest(f.Interface.(*http.Request))
+		case []error:
+			for _, e := range v {
+				exceptions = append(exceptions, sentry.Exception{
+					Type:       reflect.TypeOf(e).String(),
+					Value:      e.Error(),
+					Stacktrace: c.prepareStacktrace(e),
+				})
+			}
+		case *http.Request:
+			httpRequest = sentry.NewRequest(v)
 		default:
 			extra[f.Key] = f
 		}
