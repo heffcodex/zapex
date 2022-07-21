@@ -1,20 +1,21 @@
-package zapex
+package console
 
 import (
 	"os"
 
+	"github.com/heffcodex/zapex/consts"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
 var consoleEncoderConfig = zapcore.EncoderConfig{
-	TimeKey:        "ts",
-	LevelKey:       "level",
-	NameKey:        "logger",
-	CallerKey:      "caller",
+	TimeKey:        consts.KeyTime,
+	LevelKey:       consts.KeyLevel,
+	NameKey:        consts.KeyName,
+	CallerKey:      consts.KeyCaller,
 	FunctionKey:    zapcore.OmitKey,
-	MessageKey:     "msg",
-	StacktraceKey:  "stacktrace",
+	MessageKey:     consts.KeyMessage,
+	StacktraceKey:  consts.KeyStacktrace,
 	LineEnding:     zapcore.DefaultLineEnding,
 	EncodeLevel:    zapcore.CapitalLevelEncoder,
 	EncodeTime:     zapcore.RFC3339TimeEncoder,
@@ -22,7 +23,7 @@ var consoleEncoderConfig = zapcore.EncoderConfig{
 	EncodeCaller:   zapcore.ShortCallerEncoder,
 }
 
-func newCoreConsole(enab zapcore.LevelEnabler) zapcore.Core {
+func NewCore(enab zapcore.LevelEnabler) zapcore.Core {
 	consoleEncoder := zapcore.NewConsoleEncoder(consoleEncoderConfig)
 
 	lvlError := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {

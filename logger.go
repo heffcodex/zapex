@@ -3,15 +3,18 @@ package zapex
 import (
 	"net/http"
 
+	"github.com/heffcodex/zapex/console"
+	"github.com/heffcodex/zapex/consts"
+	"github.com/heffcodex/zapex/sentry"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-var _logger = zap.L()
+var _logger, _ = zap.NewDevelopment()
 
 func Setup(level string) error {
-	hub, err := newSentryHub()
+	hub, err := sentry.NewHub()
 	if err != nil {
 		return errors.Wrap(err, "cannot make Sentry hub")
 	}
@@ -27,8 +30,8 @@ func Setup(level string) error {
 	})
 
 	core := zapcore.NewTee(
-		newCoreConsole(lvlGlobal),
-		newCoreSentry(hub, lvlGlobal),
+		console.NewCore(lvlGlobal),
+		sentry.NewCore(hub, lvlGlobal),
 	)
 
 	_logger = zap.New(core)
@@ -45,5 +48,5 @@ func HTTPRequest(r *http.Request) zap.Field {
 		return zap.Skip()
 	}
 
-	return zap.Field{Key: httpRequestKey, Type: zapcore.ReflectType, Interface: r}
+	return zap.Field{Key: consts.KeyHTTPRequest, Type: zapcore.ReflectType, Interface: r}
 }

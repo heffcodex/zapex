@@ -1,8 +1,8 @@
-package zapex
+package sentry
 
 import "github.com/getsentry/sentry-go"
 
-func newSentryHub() (*sentry.Hub, error) {
+func NewHub() (*sentry.Hub, error) {
 	c, err := sentry.NewClient(sentry.ClientOptions{})
 	if err != nil {
 		return nil, err
