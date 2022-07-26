@@ -107,6 +107,11 @@ func writeField(ns string, field zapcore.Field, evt *sentry.Event) {
 	}
 
 	vof := reflect.ValueOf(field.Interface)
+	if !vof.IsValid() {
+		evt.Extra[key] = field
+		return
+	}
+
 	tof := vof.Type()
 
 	if tof.ConvertibleTo(errType) {
