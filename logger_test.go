@@ -8,15 +8,18 @@ import (
 	"go.uber.org/zap"
 )
 
-func TestL(t *testing.T) {
-	require.NoError(t, Setup(zap.DebugLevel.String()))
+func TestDefault(t *testing.T) {
+	l, err := New(zap.DebugLevel.String())
+	require.NoError(t, err)
 
-	L().Error("error",
+	SetDefault(l)
+
+	Default().Error("error",
 		zap.NamedError("named", errors.New("named-error")),
 		zap.Namespace("ns"),
 		zap.Error(errors.New("error")),
 		zap.Errors("errors", []error{errors.New("error1"), errors.New("error2")}),
 	)
 
-	_ = L().Sync()
+	_ = Default().Sync()
 }

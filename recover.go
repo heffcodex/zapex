@@ -7,9 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type RecoveryFunc func(err error)
-
-func OnRecover(f RecoveryFunc) func() {
+func OnRecover(f func(err error)) func() {
 	return func() {
 		if e := recover(); e != nil {
 			err := errors.New(printany(e))

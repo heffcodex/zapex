@@ -1,28 +1,25 @@
 package zapex
 
 import (
-	"net/http"
-
 	"github.com/heffcodex/zapex/console"
-	"github.com/heffcodex/zapex/consts"
 	"github.com/heffcodex/zapex/sentry"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-var _logger, _ = zap.NewDevelopment()
+var defaultLogger, _ = zap.NewDevelopment()
 
-func Setup(level string) error {
+func New(level string) (*zap.Logger, error) {
 	hub, err := sentry.NewHub()
 	if err != nil {
-		return errors.Wrap(err, "cannot make Sentry hub")
+		return nil, errors.Wrap(err, "cannot make sentry.Hub")
 	}
 
 	var zapLevel zapcore.Level
 
 	if err := zapLevel.Set(level); err != nil {
-		return errors.Wrap(err, "cannot set global level")
+		return nil, errors.Wrap(err, "cannot set global level")
 	}
 
 	lvlGlobal := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
@@ -34,19 +31,15 @@ func Setup(level string) error {
 		sentry.NewCore(hub, lvlGlobal),
 	)
 
-	_logger = zap.New(core)
+	logger := zap.New(core)
 
-	return nil
+	return logger, nil
 }
 
-func L() *zap.Logger {
-	return _logger
+func Default() *zap.Logger {
+	return defaultLogger
 }
 
-func HTTPRequest(r *http.Request) zap.Field {
-	if r == nil {
-		return zap.Skip()
-	}
-
-	return zap.Field{Key: consts.KeyHTTPRequest, Type: zapcore.ReflectType, Interface: r}
+func SetDefault(logger *zap.Logger) {
+	defaultLogger = logger
 }

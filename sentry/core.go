@@ -1,7 +1,7 @@
 package sentry
 
 import (
-	"net/http"
+	"github.com/heffcodex/zapex/zfield"
 	"reflect"
 	"time"
 
@@ -86,7 +86,7 @@ func (c *Core) Write(ent zapcore.Entry, fields []zapcore.Field) error {
 			continue
 		}
 
-		writeField(ns, f, evt)
+		c.writeField(ns, f, evt)
 	}
 
 	if evtID := c.hub.CaptureEvent(evt); evtID == nil {
@@ -100,7 +100,7 @@ func (c *Core) Write(ent zapcore.Entry, fields []zapcore.Field) error {
 	return nil
 }
 
-func writeField(ns string, field zapcore.Field, evt *sentry.Event) {
+func (c *Core) writeField(ns string, field zapcore.Field, evt *sentry.Event) {
 	key := field.Key
 	if ns != "" {
 		key = ns + "." + field.Key
@@ -122,8 +122,8 @@ func writeField(ns string, field zapcore.Field, evt *sentry.Event) {
 		return
 	}
 
-	if v, ok := field.Interface.(*http.Request); ok {
-		evt.Request = sentry.NewRequest(v)
+	if r, ok := field.Interface.(*zfield.HTTPRequest); ok {
+		evt.Request = r.ToSentry(c.hub.Client())
 		return
 	}
 
