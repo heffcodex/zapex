@@ -1,11 +1,11 @@
-package zfield
+package zf
 
 import (
 	"go.uber.org/zap"
 )
 
-type ZField interface {
-	ToField() zap.Field
+type Field interface {
+	Field() zap.Field
 }
 
 func min(a, b int64) int64 {

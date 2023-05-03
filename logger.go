@@ -1,11 +1,13 @@
 package zapex
 
 import (
-	"github.com/heffcodex/zapex/console"
-	"github.com/heffcodex/zapex/sentry"
-	"github.com/pkg/errors"
+	"fmt"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/heffcodex/zapex/console"
+	"github.com/heffcodex/zapex/sentry"
 )
 
 var defaultLogger, _ = zap.NewDevelopment()
@@ -13,13 +15,13 @@ var defaultLogger, _ = zap.NewDevelopment()
 func New(level string) (*zap.Logger, error) {
 	hub, err := sentry.NewHub()
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot make sentry.Hub")
+		return nil, fmt.Errorf("make sentry.Hub: %w", err)
 	}
 
 	var zapLevel zapcore.Level
 
 	if err := zapLevel.Set(level); err != nil {
-		return nil, errors.Wrap(err, "cannot set global level")
+		return nil, fmt.Errorf("set level: %w", err)
 	}
 
 	lvlGlobal := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {

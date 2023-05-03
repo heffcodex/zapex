@@ -3,9 +3,10 @@ package console
 import (
 	"os"
 
-	"github.com/heffcodex/zapex/consts"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/heffcodex/zapex/consts"
 )
 
 var consoleEncoderConfig = zapcore.EncoderConfig{

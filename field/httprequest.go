@@ -1,16 +1,18 @@
-package zfield
+package zf
 
 import (
+	"fmt"
+	"net/http"
+	"net/url"
+	"strings"
+
 	"github.com/getsentry/sentry-go"
-	"github.com/heffcodex/zapex/consts"
-	"github.com/pkg/errors"
 	"github.com/valyala/bytebufferpool"
 	"github.com/valyala/fasthttp"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"net/http"
-	"net/url"
-	"strings"
+
+	"github.com/heffcodex/zapex/consts"
 )
 
 const (
@@ -28,7 +30,7 @@ var (
 	}
 
 	_ zapcore.ObjectMarshaler = (*HTTPRequest)(nil)
-	_ ZField                  = (*HTTPRequest)(nil)
+	_ Field                   = (*HTTPRequest)(nil)
 )
 
 type HTTPRequest struct {
@@ -55,7 +57,7 @@ func (f *HTTPRequest) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	return nil
 }
 
-func (f *HTTPRequest) ToField() zap.Field {
+func (f *HTTPRequest) Field() zap.Field {
 	return zap.Field{Key: consts.KeyHTTPRequest, Type: zapcore.ObjectMarshalerType, Interface: f}
 }
 
@@ -110,7 +112,7 @@ func NewHTTPRequest(r *http.Request) *HTTPRequest {
 
 	read, err := f.Body.ReadFrom(r.Body)
 	if err != nil {
-		f.DumpErrors = append(f.DumpErrors, errors.Wrap(err, "cannot dump http.Request body to buffer"))
+		f.DumpErrors = append(f.DumpErrors, fmt.Errorf("dump http.Request body: %w", err))
 	} else if read > HTTPRequestFieldBodyDumpLimitBytes {
 		f.Body.B = f.Body.B[:HTTPRequestFieldBodyDumpLimitBytes]
 	}
@@ -135,7 +137,7 @@ func NewFastHTTPRequest(r *fasthttp.Request) *HTTPRequest {
 
 	uri, err := url.ParseRequestURI(r.URI().String())
 	if err != nil {
-		f.DumpErrors = append(f.DumpErrors, errors.Wrap(err, "cannot parse fasthttp.Request URI"))
+		f.DumpErrors = append(f.DumpErrors, fmt.Errorf("parse fasthttp.Request URI: %w", err))
 	} else {
 		f.URI = uri
 	}
@@ -146,11 +148,11 @@ func NewFastHTTPRequest(r *fasthttp.Request) *HTTPRequest {
 
 	body, err := r.BodyUncompressed()
 	if err != nil {
-		f.DumpErrors = append(f.DumpErrors, errors.Wrap(err, "cannot get uncompressed fasthttp.Request body"))
+		f.DumpErrors = append(f.DumpErrors, fmt.Errorf("decompress fasthttp.Request body: %w", err))
 	} else if len(body) > 0 {
 		_, err = f.Body.Write(body[:min(int64(len(body)), HTTPRequestFieldBodyDumpLimitBytes)])
 		if err != nil {
-			f.DumpErrors = append(f.DumpErrors, errors.Wrap(err, "cannot dump fasthttp.Request body to buffer"))
+			f.DumpErrors = append(f.DumpErrors, fmt.Errorf("dump fasthttp.Request body: %w", err))
 		}
 	}
 

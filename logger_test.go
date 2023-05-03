@@ -1,9 +1,9 @@
 package zapex
 
 import (
+	"errors"
 	"testing"
 
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )

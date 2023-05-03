@@ -1,14 +1,15 @@
 package sentry
 
 import (
-	"github.com/heffcodex/zapex/zfield"
+	"errors"
 	"reflect"
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	zf "github.com/heffcodex/zapex/field"
 )
 
 const (
@@ -122,7 +123,7 @@ func (c *Core) writeField(ns string, field zapcore.Field, evt *sentry.Event) {
 		return
 	}
 
-	if r, ok := field.Interface.(*zfield.HTTPRequest); ok {
+	if r, ok := field.Interface.(*zf.HTTPRequest); ok {
 		evt.Request = r.ToSentry(c.hub.Client())
 		return
 	}
@@ -132,7 +133,7 @@ func (c *Core) writeField(ns string, field zapcore.Field, evt *sentry.Event) {
 
 func (c *Core) Sync() (err error) {
 	if !c.hub.Flush(flushTimeout) {
-		err = errors.New("cannot flush hub")
+		err = errors.New("flush hub")
 	}
 
 	return

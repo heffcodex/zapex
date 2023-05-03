@@ -1,10 +1,9 @@
 package zapex
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
-
-	"github.com/pkg/errors"
 )
 
 func OnRecover(f func(err error)) func() {
