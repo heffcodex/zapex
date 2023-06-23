@@ -15,7 +15,7 @@ import (
 const (
 	defaultLevel        = zapcore.WarnLevel
 	flushTimeout        = 5 * time.Second
-	omitHeadStackFrames = 4
+	omitHeadStackFrames = 6
 )
 
 var sentryLevelMap = map[zapcore.Level]sentry.Level{
